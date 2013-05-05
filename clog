@@ -1,0 +1,41 @@
+#!/bin/bash
+#Use the key to login the Yeepay Server.
+#You should input the key-number that for your yeepay-username.
+#default username is "xuehan.zhu"
+#default key Prefix number is "2418"
+#default server ip is "10.147.130.13"
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+username='xuehan.zhu'
+serverip='10.147.130.13'
+prefix='2418'
+key=$1
+log_path=${HOME}/log
+password_file=${log_path}/password
+input_filename=$2
+
+[ ! "$1" ] && echo "rsa-key is empty. Bye~" && exit 0
+[ "$1" != "" ] && password=${prefix}${key}
+
+filename=${input_filename:-"test"}
+date=$(date +%m-%d-)
+file=${date}${filename}
+
+echo -n "Genernating log file..."
+
+log_file=${log_path}/${file}.log
+echo "file:${log_file}"
+
+#create file to store the password.
+touch ${password_file}
+#store password in tmp file.
+echo "echo ${password}" > ${password_file}
+chmod +x ${password_file}
+echo "Login..."
+
+export SSH_ASKPASS=${password_file}
+setsid ssh ${username}@${serverip} | tee ${log_file}
+
+echo "ssh session is closed. Remove tmp files. Bye~"
+rm ${password_file}
